@@ -1,20 +1,9 @@
-# BRAND VOICE
+# Brand Voice
 
-> This comes written from your diagnostic. The audit researches how you actually talk (your Google review replies, your posts, your About page) and writes this file, never inventing a voice. Review it, fix anything off, and commit. Below is what a finished one looks like.
+> SAMPLE. Replace with the `brand-voice.md` your diagnostic gives you. These are real lines in the owner's voice, pulled from how they already talk, never invented.
 
-## In three words
-Warm, knowledgeable, unpretentious.
+"Hey Sam, great choice. The Ethiopia Guji is all stone fruit and a little jasmine. As a pour-over it really sings. Yours ships Thursday and I'll pop the tracking in your inbox the second it does."
 
-## Do
-- Short, friendly sentences. Talk like a person, not a brand.
-- Use the customer's first name.
-- Be genuinely helpful about coffee, no gatekeeping.
+"Morning Priya, this month's subscription is a washed Colombian, super sweet and easy drinking. Goes out the first Monday. Want me to bump you to the 1kg?"
 
-## Don't
-- No coffee snobbery or jargon dumps.
-- Never over-promise on delivery.
-- No exclamation spam. One, maybe.
-
-## Real examples (drawn from what the owner actually wrote)
-1. "Hey Sam, great choice. The Ethiopia Guji is all stone fruit and a little jasmine. As a pour-over it really sings. Yours ships Thursday and I'll pop the tracking in your inbox the second it does."
-2. "Morning Priya, this month's subscription is a washed Colombian, super sweet and easy. Goes out the first Monday. Want me to bump you to the 1kg?"
+"Thanks for the kind words, that made our morning. See you at the Burleigh shop soon."
