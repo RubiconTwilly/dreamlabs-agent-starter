@@ -1,0 +1,10 @@
+# NEVER commit secrets. Credentials live in your Cloud Environment, not in this repo.
+.env
+*.env
+.env.*
+secrets
+secrets.*
+*secret*
+*.key
+*.pem
+.DS_Store
