@@ -18,12 +18,13 @@ Every integration is the same three moves:
 - **For:** reading the inbox AND creating draft replies inside Gmail, over the official Gmail API (plain HTTPS on port 443).
 - **Why API and not IMAP:** Claude cloud environments only allow HTTPS (port 443). IMAP ports (993/143) are blocked at the infrastructure level on every access setting, so app-password IMAP can never work there. The Gmail API does the same reads and drafts over 443.
 - **Get it (one time, about 10 minutes):**
-  1. Open `console.cloud.google.com` signed in as the Gmail the agent will read, create a **New project** (any name).
-  2. Search **Gmail API**, click **Enable**.
-  3. **OAuth consent screen**: External, fill app name + your email, add your own Gmail under **Test users**, save.
-  4. **Credentials -> Create credentials -> OAuth client ID -> Desktop app**. Copy the **Client ID** and **Client secret**.
-  5. Open `developers.google.com/oauthplayground`, click the gear (top right), tick **Use your own OAuth credentials**, paste the ID + secret.
-  6. In the scope box paste `https://mail.google.com/`, click **Authorize APIs** (click **Continue** past the unverified-app screen, it is YOUR app), then **Exchange authorization code for tokens** and copy the **Refresh token**.
+  1. Open `console.cloud.google.com` signed in as the inbox the agent will read. Project picker (top left) -> **New project**, any name, create it. Creating does NOT select it: click the picker again and choose it. The top bar must show that project name through every step below.
+  2. Search **Gmail API** in the top bar, open it, click **Enable**.
+  3. Search **OAuth consent screen** (newer consoles: **Google Auth Platform**). If **Internal** is offered (Workspace account), pick it and skip step 4. Otherwise **External**, app name + your email, save.
+  4. External only: on the consent page click **Publish app** and confirm. Apps left in Testing get their refresh tokens expired by Google every 7 days.
+  5. Back to **Gmail API** -> **Manage** -> **Credentials** tab -> **Create credentials -> OAuth client ID** -> **Desktop app**, any name. Copy the **Client ID** and **Client secret** from the popup immediately, the secret is shown in full only once.
+  6. Open `developers.google.com/oauthplayground`, gear icon top right, tick **Use your own OAuth credentials**, paste the ID + secret.
+  7. Left box: paste the scope `https://mail.google.com/`, click **Authorize APIs**, pick the account, click **Advanced** past the unverified warning (it is your own app), allow. Then **Exchange authorization code for tokens** and copy the **Refresh token**.
 - **Env vars:** `GMAIL_ADDRESS`, `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`
 - **How the agent uses them:** POST `https://oauth2.googleapis.com/token` with `client_id`, `client_secret`, `refresh_token`, `grant_type=refresh_token` to get an access token, then call `https://gmail.googleapis.com/gmail/v1/users/me/...` with `Authorization: Bearer`.
 - **What it does:** LISTS unread mail (`q=is:unread newer_than:1d`), GETs each message (API reads never mark anything as read), and CREATES a reply via `drafts.create` with a raw RFC822 message carrying `In-Reply-To`/`References` and the original `threadId`, so the draft sits threaded in Gmail's Drafts folder. Creating a draft is NOT sending. The owner reviews and sends from Gmail.
