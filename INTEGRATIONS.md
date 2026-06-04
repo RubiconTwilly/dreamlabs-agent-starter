@@ -14,8 +14,9 @@ Every integration is the same three moves:
 
 ---
 
-## Email (Gmail API over HTTPS) - the inbox agent
-- **For:** reading the inbox AND creating draft replies inside Gmail, over the official Gmail API (plain HTTPS on port 443).
+## Email (Gmail) - the inbox agent
+- **FIRST CHOICE - the Claude Gmail connector (no keys):** connect Gmail under claude.ai Settings -> Connectors (sign in as the support inbox), and make sure the routine includes the Gmail connector. The session then has native Gmail tools for reading mail and creating drafts. Connector traffic routes through Anthropic's servers, no allowlist or env vars needed.
+- **FALLBACK - the Gmail API over HTTPS:** for accounts where connectors are unavailable. Reading the inbox AND creating draft replies over the official Gmail API (plain HTTPS on port 443).
 - **Why API and not IMAP:** Claude cloud environments only allow HTTPS (port 443). IMAP ports (993/143) are blocked at the infrastructure level on every access setting, so app-password IMAP can never work there. The Gmail API does the same reads and drafts over 443.
 - **Get it (one time, about 10 minutes):**
   1. Open `console.cloud.google.com` signed in as the inbox the agent will read. Project picker (top left) -> **New project**, any name, create it. Creating does NOT select it: click the picker again and choose it. The top bar must show that project name through every step below.
