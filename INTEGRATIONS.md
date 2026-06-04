@@ -6,13 +6,10 @@ Every integration is the same three moves:
 3. Tell your agent the env var name in `agent.md`, so it knows what data it can pull.
 
 ## Golden rules (read these once)
-
-- **Draft mode means read-only.** Your agent reads data to draft work. It does not need send, write, or charge permissions. Always grant the narrowest read-only key the tool offers. A read-only key that leaks cannot do damage.
-- **Keys live in the Cloud Environment, never in the repo.** The `.gitignore` blocks the common secret filenames, but the real rule is simpler: a key only ever goes in the Cloud Environment box.
-- **The Cloud Environment is not encrypted at rest, and anyone who can edit it can read it.** For your own private agent that is fine. If you ever share the environment with someone, rotate the keys afterward.
-- **One secret per env var, named clearly.** `SQUARE_ACCESS_TOKEN`, not `TOKEN`.
-
----
+- Connector first, always: Gmail, Microsoft 365, Square, Mailchimp, Shopify and Google Calendar connect ONLY through official Claude connectors (Settings -> Connectors). No keys, no tokens, no manual OAuth, ever.
+- Keys exist only for tools without a usable connector: Telegram, Stripe, Slack, HubSpot. Those keys are read-only or scoped, live in the routine environment, and are never printed or committed.
+- If a connector's tools are missing from the session: stop, log it, tell the owner which connector to attach, end cleanly. Never improvise with IMAP, app passwords, or hand-rolled credentials.
+- Drafts are never sends. The owner is the only one who sends anything, anywhere.
 
 ## Email (Gmail) - the inbox agent
 - **The path: the official Claude Gmail connector. Connector only, no keys, no manual fallback.**
@@ -35,10 +32,8 @@ Every integration is the same three moves:
 - **Gotcha:** you must message the bot first or `getUpdates` comes back empty. For a group chat, `chat_id` is a negative number.
 
 ## Square - sales, stock, appointments
-- **First choice - the official Square connector:** in Claude, Settings -> Connectors -> Square -> Connect, authorize in the popup. No token, attaches to routines natively.
-- **Manual fallback:** developer.squareup.com -> your app -> Credentials tab -> toggle Sandbox to Production -> copy the **Production Access Token**. HONEST WARNING: this token is full-access and unscoped, Square offers no read-only version of it. Read-only behavior is enforced by the agent's rules, not the credential. Prefer the connector.
-- **Env var (manual only):** `SQUARE_ACCESS_TOKEN`
-- **Gotcha:** raw Square REST calls need a `Square-Version` header (e.g. `Square-Version: 2026-01-22`) or they 400. The connector handles this for you.
+- **Connector only.** claude.ai -> Settings -> Connectors -> Square (built by Square) -> Connect, authorize in the popup with the owner login. Confirm it is in the routine's Connectors tab. No token, no env vars.
+- **If the connector tools are missing:** STOP, tell the owner to attach the Square connector, end the run cleanly. Never ask for or use a personal access token.
 
 ## Stripe - revenue, customers, subscriptions
 - **Get it:** dashboard.stripe.com/apikeys (check the dashboard is NOT in Test mode) -> **Create restricted key** -> name it claude-readonly -> leave everything None, set just what is needed to **Read** (Customers, Charges, Invoices, Subscriptions). Stripe asks for a 2FA code, then shows the `rk_live_` key ONCE - copy immediately, it cannot be re-shown.
