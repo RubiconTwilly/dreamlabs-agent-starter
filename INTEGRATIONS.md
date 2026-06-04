@@ -15,22 +15,11 @@ Every integration is the same three moves:
 ---
 
 ## Email (Gmail) - the inbox agent
-- **FIRST CHOICE - the Claude Gmail connector (no keys):** connect Gmail under claude.ai Settings -> Connectors (sign in as the support inbox), and make sure the routine includes the Gmail connector. The session then has native Gmail tools for reading mail and creating drafts. Connector traffic routes through Anthropic's servers, no allowlist or env vars needed.
-- **FALLBACK - the Gmail API over HTTPS:** for accounts where connectors are unavailable. Reading the inbox AND creating draft replies over the official Gmail API (plain HTTPS on port 443).
-- **Why API and not IMAP:** Claude cloud environments only allow HTTPS (port 443). IMAP ports (993/143) are blocked at the infrastructure level on every access setting, so app-password IMAP can never work there. The Gmail API does the same reads and drafts over 443.
-- **Get it (one time, about 10 minutes):**
-  1. Open `console.cloud.google.com` signed in as the inbox the agent will read. Project picker (top left) -> **New project**, any name, create it. Creating does NOT select it: click the picker again and choose it. The top bar must show that project name through every step below.
-  2. Search **Gmail API** in the top bar, open it, click **Enable**.
-  3. Search **OAuth consent screen** (newer consoles: **Google Auth Platform**). If **Internal** is offered (Workspace account), pick it and skip step 4. Otherwise **External**, app name + your email, save.
-  4. External only: on the consent page click **Publish app** and confirm. Apps left in Testing get their refresh tokens expired by Google every 7 days.
-  5. Back to **Gmail API** -> **Manage** -> **Credentials** tab -> **Create credentials -> OAuth client ID** -> type **Web application**, any name. Under **Authorized redirect URIs** add `https://developers.google.com/oauthplayground` (exact, no trailing slash). Create, then copy the **Client ID** and **Client secret** from the popup immediately, the secret is shown in full only once. (Desktop-type clients cause redirect_uri_mismatch in the playground.)
-  6. Open `developers.google.com/oauthplayground`, gear icon top right, tick **Use your own OAuth credentials**, paste the ID + secret.
-  7. Left box: paste the scope `https://mail.google.com/`, click **Authorize APIs**, pick the account, click **Advanced** past the unverified warning (it is your own app), allow. Then **Exchange authorization code for tokens** and copy the **Refresh token**.
-- **Env vars:** `GMAIL_ADDRESS`, `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`
-- **How the agent uses them:** POST `https://oauth2.googleapis.com/token` with `client_id`, `client_secret`, `refresh_token`, `grant_type=refresh_token` to get an access token, then call `https://gmail.googleapis.com/gmail/v1/users/me/...` with `Authorization: Bearer`.
-- **What it does:** LISTS unread mail (`q=is:unread newer_than:1d`), GETs each message (API reads never mark anything as read), and CREATES a reply via `drafts.create` with a raw RFC822 message carrying `In-Reply-To`/`References` and the original `threadId`, so the draft sits threaded in Gmail's Drafts folder. Creating a draft is NOT sending. The owner reviews and sends from Gmail.
-- **Gotcha:** the playground's Refresh token comes back empty if you forgot the gear-icon **Use your own OAuth credentials** step. The unverified-app warning is normal for your own test app, click Continue.
-- **Safety note:** the full `https://mail.google.com/` scope technically allows sending, so "never send" is enforced by the hard rule in `CLAUDE.md`. For a key-level guarantee use the narrower pair `gmail.readonly` + `gmail.compose` instead when authorizing in the playground.
+- **The path: the official Claude Gmail connector. Connector only, no keys, no manual fallback.**
+- **Get it:** claude.ai -> Settings -> Connectors -> Gmail -> Connect, signing in as the support inbox (not a personal account). The routine includes connected connectors by default; confirm Gmail is listed in the routine's Connectors tab.
+- **How the agent uses it:** native Gmail connector tools in the session (load via ToolSearch, query "gmail"): list/read unread mail, create threaded draft replies. Reading never marks mail as read. Creating a draft is NOT sending.
+- **If the connector tools are missing:** STOP. Do not attempt IMAP, SMTP, app passwords, or hand-rolled OAuth. Write the run log and tell the owner exactly this: "Attach the Gmail connector: claude.ai -> Settings -> Connectors -> Gmail -> Connect, then check this routine's Connectors tab." Then end the run cleanly.
+- **Why no other method:** this environment only allows HTTPS through Anthropic's proxy. IMAP ports are blocked at infrastructure level, and manual OAuth credential juggling is retired in favor of the connector.
 
 ## Telegram - notifications and approvals
 - **For:** pinging you when drafts are ready.
