@@ -39,17 +39,15 @@ Every integration is the same three moves:
 - **Gotcha:** you must message the bot first or `getUpdates` comes back empty. For a group chat, `chat_id` is a negative number.
 
 ## Square - sales, stock, appointments
-- **For:** POS sales, inventory levels, appointments, customers (inventory and scheduling agents).
-- **Get it:** `https://developer.squareup.com` -> your application -> **Production Access Token** (use the Sandbox token first to test). For tighter control, use OAuth with read-only scopes; for a solo self-host the access token is simplest.
-- **Read-only scopes:** `MERCHANT_PROFILE_READ`, `ITEMS_READ`, `INVENTORY_READ`, `ORDERS_READ`, `PAYMENTS_READ`, `CUSTOMERS_READ`, `APPOINTMENTS_READ`
-- **Env vars:** `SQUARE_ACCESS_TOKEN` (and `SQUARE_LOCATION_ID` if you have more than one location)
-- **Gotcha:** every Square call needs a `Square-Version` header (e.g. `2024-10-17`) or it 400s. Keep production and sandbox tokens straight.
+- **First choice - the official Square connector:** in Claude, Settings -> Connectors -> Square -> Connect, authorize in the popup. No token, attaches to routines natively.
+- **Manual fallback:** developer.squareup.com -> your app -> Credentials tab -> toggle Sandbox to Production -> copy the **Production Access Token**. HONEST WARNING: this token is full-access and unscoped, Square offers no read-only version of it. Read-only behavior is enforced by the agent's rules, not the credential. Prefer the connector.
+- **Env var (manual only):** `SQUARE_ACCESS_TOKEN`
+- **Gotcha:** raw Square REST calls need a `Square-Version` header (e.g. `Square-Version: 2026-01-22`) or they 400. The connector handles this for you.
 
 ## Stripe - revenue, customers, subscriptions
-- **For:** revenue, new and churned customers, failed payments (morning brief, win-back, lead nurture).
-- **Get it:** `https://dashboard.stripe.com/apikeys` -> **Create restricted key**. Set everything to None except **read** on what you need (Charges read, Customers read, Subscriptions read, Invoices read). Copy the `rk_live_...` (or `rk_test_...`).
-- **Env var:** `STRIPE_API_KEY`
-- **Gotcha:** use a RESTRICTED key, never your secret key (`sk_`). Read-only. A restricted read key cannot move money even if it leaks.
+- **Get it:** dashboard.stripe.com/apikeys (check the dashboard is NOT in Test mode) -> **Create restricted key** -> name it claude-readonly -> leave everything None, set just what is needed to **Read** (Customers, Charges, Invoices, Subscriptions). Stripe asks for a 2FA code, then shows the `rk_live_` key ONCE - copy immediately, it cannot be re-shown.
+- **Env var:** `STRIPE_RESTRICTED_KEY`
+- **Gotcha:** never use the full secret key (`sk_`). The restricted read-only key cannot move money even if it leaks.
 
 ## Slack - team and support channels
 - **For:** reading support or team channels, optionally posting a draft notice (support agent).
