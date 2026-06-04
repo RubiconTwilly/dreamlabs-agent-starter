@@ -21,6 +21,13 @@ Every integration is the same three moves:
 - **If the connector tools are missing:** STOP. Do not attempt IMAP, SMTP, app passwords, or hand-rolled OAuth. Write the run log and tell the owner exactly this: "Attach the Gmail connector: claude.ai -> Settings -> Connectors -> Gmail -> Connect, then check this routine's Connectors tab." Then end the run cleanly.
 - **Why no other method:** this environment only allows HTTPS through Anthropic's proxy. IMAP ports are blocked at infrastructure level, and manual OAuth credential juggling is retired in favor of the connector.
 
+## Email (Outlook / Microsoft 365) - the inbox agent, Microsoft edition
+- **The path: the official Microsoft 365 connector.** Business/work Microsoft accounts only; Microsoft rejects personal Outlook.com and Hotmail logins on it.
+- **Get it:** claude.ai -> Settings -> Connectors -> Microsoft 365 -> Connect with the business Microsoft account, approve Microsoft's screen. Confirm it is listed in the routine's Connectors tab.
+- **Reading:** native connector tools in the session (load via ToolSearch, try "microsoft", "outlook", "m365"). Read unread mail from the last 24 hours, capped at 15.
+- **Drafting, the honest catch:** the connector is READ-ONLY and cannot create drafts inside Outlook. Write each reply as its own file in `drafts/` in this repo (recipient, subject, body), push, and notify the owner on Telegram. The owner copies the text into Outlook and sends it. Never try to send or to write into Outlook.
+- **If the connector tools are missing:** STOP. Do not attempt IMAP, Graph API credentials, or app passwords. Log it and tell the owner to attach the Microsoft 365 connector, then end the run cleanly.
+
 ## Telegram - notifications and approvals
 - **For:** pinging you when drafts are ready.
 - **Get it:** message `@BotFather`, send `/newbot`, copy the token. Then message your new bot once, open `https://api.telegram.org/bot<TOKEN>/getUpdates`, and find `chat.id` in the JSON.
