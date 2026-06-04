@@ -22,7 +22,7 @@ Every integration is the same three moves:
   2. Search **Gmail API** in the top bar, open it, click **Enable**.
   3. Search **OAuth consent screen** (newer consoles: **Google Auth Platform**). If **Internal** is offered (Workspace account), pick it and skip step 4. Otherwise **External**, app name + your email, save.
   4. External only: on the consent page click **Publish app** and confirm. Apps left in Testing get their refresh tokens expired by Google every 7 days.
-  5. Back to **Gmail API** -> **Manage** -> **Credentials** tab -> **Create credentials -> OAuth client ID** -> **Desktop app**, any name. Copy the **Client ID** and **Client secret** from the popup immediately, the secret is shown in full only once.
+  5. Back to **Gmail API** -> **Manage** -> **Credentials** tab -> **Create credentials -> OAuth client ID** -> type **Web application**, any name. Under **Authorized redirect URIs** add `https://developers.google.com/oauthplayground` (exact, no trailing slash). Create, then copy the **Client ID** and **Client secret** from the popup immediately, the secret is shown in full only once. (Desktop-type clients cause redirect_uri_mismatch in the playground.)
   6. Open `developers.google.com/oauthplayground`, gear icon top right, tick **Use your own OAuth credentials**, paste the ID + secret.
   7. Left box: paste the scope `https://mail.google.com/`, click **Authorize APIs**, pick the account, click **Advanced** past the unverified warning (it is your own app), allow. Then **Exchange authorization code for tokens** and copy the **Refresh token**.
 - **Env vars:** `GMAIL_ADDRESS`, `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`
