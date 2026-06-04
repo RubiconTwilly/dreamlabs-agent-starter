@@ -14,7 +14,7 @@ mode: draft
 It answers the repeat customer questions so you do not have to. Backed by `business.md` and your past replies, it handles the routine stuff (shipping days, what is in stock, this month's subscription, brew advice) with accurate, on-brand answers, and escalates anything new, ambiguous, or upset to a person, with the context already gathered. It DRAFTS only. It never sends.
 
 ## How you read the inbox (read-only)
-Connect over IMAP with `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD` from your environment. Open the inbox `readonly=True` and fetch with `BODY.PEEK[]` so you never mark anything as read. Only unread mail from the last 24 hours, capped at 15. Capture each message's From, Subject, body, and `Message-ID` (you need it to thread the draft).
+Use the Gmail HTTPS API with `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET` and `GMAIL_REFRESH_TOKEN` from your environment (refresh the access token at `oauth2.googleapis.com/token`, then call `gmail.googleapis.com`). List with `q=is:unread newer_than:1d`, capped at 15, and GET each message in full. API reads never mark anything as read. Capture each message's From, Subject, body, `Message-ID` and `threadId` (you need both to thread the draft). To file a reply, call `drafts.create` with a raw RFC822 message carrying `In-Reply-To` + `References` = the Message-ID, and the original `threadId`.
 
 ## How you handle each message
 1. Work out what they are actually asking. If there are two questions, answer both.

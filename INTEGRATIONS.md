@@ -14,13 +14,21 @@ Every integration is the same three moves:
 
 ---
 
-## Email (Gmail over IMAP) - the inbox agent
-- **For:** reading the inbox AND leaving draft replies inside Gmail. One app password does both over IMAP.
-- **Get it:** turn on 2-Step Verification, then go to `https://myaccount.google.com/apppasswords` and create an app password named `dreamlabs-agent`. Google shows a 16-character code once.
-- **Env vars:** `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`
-- **What it does:** READS recent mail (read-only, `BODY.PEEK`, never marks as read) and APPENDS a reply into the Drafts folder, threaded under the original. Appending to Drafts is NOT sending. The owner reviews and sends from Gmail.
-- **Gotcha:** it is an app password, not your normal login, and needs 2-Step Verification first. For Outlook and others, use their app password and IMAP host. The Drafts folder is `[Gmail]/Drafts` on English accounts; detect it by the `\Drafts` flag if yours is localized.
-- **Safety note:** an app password technically also allows SMTP send, so "never send" is enforced by the agent's hard rule in `CLAUDE.md`, not by the credential. For a guarantee at the key level, use Gmail API OAuth with a compose or modify scope and NO send scope (more setup). The app password path is the simple one for self-host.
+## Email (Gmail API over HTTPS) - the inbox agent
+- **For:** reading the inbox AND creating draft replies inside Gmail, over the official Gmail API (plain HTTPS on port 443).
+- **Why API and not IMAP:** Claude cloud environments only allow HTTPS (port 443). IMAP ports (993/143) are blocked at the infrastructure level on every access setting, so app-password IMAP can never work there. The Gmail API does the same reads and drafts over 443.
+- **Get it (one time, about 10 minutes):**
+  1. Open `console.cloud.google.com` signed in as the Gmail the agent will read, create a **New project** (any name).
+  2. Search **Gmail API**, click **Enable**.
+  3. **OAuth consent screen**: External, fill app name + your email, add your own Gmail under **Test users**, save.
+  4. **Credentials -> Create credentials -> OAuth client ID -> Desktop app**. Copy the **Client ID** and **Client secret**.
+  5. Open `developers.google.com/oauthplayground`, click the gear (top right), tick **Use your own OAuth credentials**, paste the ID + secret.
+  6. In the scope box paste `https://mail.google.com/`, click **Authorize APIs** (click **Continue** past the unverified-app screen, it is YOUR app), then **Exchange authorization code for tokens** and copy the **Refresh token**.
+- **Env vars:** `GMAIL_ADDRESS`, `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN`
+- **How the agent uses them:** POST `https://oauth2.googleapis.com/token` with `client_id`, `client_secret`, `refresh_token`, `grant_type=refresh_token` to get an access token, then call `https://gmail.googleapis.com/gmail/v1/users/me/...` with `Authorization: Bearer`.
+- **What it does:** LISTS unread mail (`q=is:unread newer_than:1d`), GETs each message (API reads never mark anything as read), and CREATES a reply via `drafts.create` with a raw RFC822 message carrying `In-Reply-To`/`References` and the original `threadId`, so the draft sits threaded in Gmail's Drafts folder. Creating a draft is NOT sending. The owner reviews and sends from Gmail.
+- **Gotcha:** the playground's Refresh token comes back empty if you forgot the gear-icon **Use your own OAuth credentials** step. The unverified-app warning is normal for your own test app, click Continue.
+- **Safety note:** the full `https://mail.google.com/` scope technically allows sending, so "never send" is enforced by the hard rule in `CLAUDE.md`. For a key-level guarantee use the narrower pair `gmail.readonly` + `gmail.compose` instead when authorizing in the playground.
 
 ## Telegram - notifications and approvals
 - **For:** pinging you when drafts are ready.
